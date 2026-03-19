@@ -9,7 +9,7 @@ RestartSec=3
 User=root
 Group=www-data
 WorkingDirectory=/opt/ontology-term-redirector
-ExecStart=poetry run gunicorn \
+ExecStart=/root/.local/bin/poetry run gunicorn \
          --error-logfile /var/log/term-redirector/uwsgi-err.log \
          --log-level INFO \
          --access-logfile /var/log/term-redirector/uwsgi-access.log \
