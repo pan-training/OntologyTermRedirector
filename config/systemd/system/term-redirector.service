@@ -1,0 +1,24 @@
+[Unit]
+Description=UWSGI gunicorn daemon for serving ontology term redirection server for PaN-Training
+After=network.target
+
+[Service]
+Type=notify
+KillSignal=SIGTERM
+RestartSec=3
+User=root
+Group=www-data
+WorkingDirectory=/opt/ontology-term-redirector
+ExecStart=poetry run gunicorn \
+         --error-logfile /var/log/term-redirector/uwsgi-err.log \
+         --log-level INFO \
+         --access-logfile /var/log/term-redirector/uwsgi-access.log \
+         --worker-class eventlet \
+         --workers 8 \
+         --timeout 300 \
+         --bind unix:/run/uwsgi/term-redirector.sock \
+         main:app
+ExecReload=/bin/kill -s HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

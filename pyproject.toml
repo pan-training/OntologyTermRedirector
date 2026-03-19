@@ -1,0 +1,24 @@
+[project]
+name = "ontology-term-redirector"
+version = "0.1.0"
+description = "A simple flask based application to compute redirect of ontology term to PaN-Training list of training materials."
+authors = [
+    {name = "Martin Voigt",email = "m.voigt@hzdr.de"}
+]
+license = {text = "GPL-3.0-or-later"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask (>=3.1.3,<4.0.0)",
+    "rdflib (>=7.6.0,<8.0.0)"
+]
+
+[tool.poetry]
+packages = [
+    { include = "ontology-term-redirector" }
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
