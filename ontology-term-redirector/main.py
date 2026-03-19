@@ -2,10 +2,7 @@ from flask import Flask, request, redirect
 from rdflib import Graph, URIRef, Literal, RDFS
 from urllib.parse import urlencode
 
-PAN_TRAINING_URL = "https://pan-training.eu"
-
 app = Flask(__name__)
-
 
 terms = Graph()
 with open("data/PaNET.owl") as f:
@@ -22,6 +19,7 @@ def root_url():
 def redirect_to_training():
     """Redirect to training materials for given ontology term."""
     term_uri = request.args.get("uri")
+    pan_training_url = request.args.get("base_url", request.url_root).rstrip("/")
 
     if not term_uri:
         return {"error": "No term URI provided. Use /term?uri=<term_uri>."}, 400
@@ -31,4 +29,4 @@ def redirect_to_training():
     if not term_labels:
         return {"error": "Term not found", "term_uri": term_uri}, 404
 
-    return redirect(f"{PAN_TRAINING_URL}/materials?{urlencode({'scientific_topics': term_labels[0]})}")
+    return redirect(f"{pan_training_url}/materials?{urlencode({'scientific_topics': term_labels[0]})}")
