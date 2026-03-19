@@ -13,7 +13,7 @@ poetry install
 Start development server:
 
 ```bash
-poetry run flask --app ontology-term-redirector/main.py run
+poetry run flask --app ontology_term_redirector/main.py run
 ```
 
 See [term-redirector.service](config/systemd/system/term-redirector.service) for deployment using gunicorn.

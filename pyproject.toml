@@ -1,5 +1,5 @@
 [project]
-name = "ontology-term-redirector"
+name = "ontology_term_redirector"
 version = "0.1.0"
 description = "A simple flask based application to compute redirect of ontology term to PaN-Training list of training materials."
 authors = [
@@ -16,7 +16,7 @@ dependencies = [
 
 [tool.poetry]
 packages = [
-    { include = "ontology-term-redirector" }
+    { include = "ontology_term_redirector" }
 ]
 
 
