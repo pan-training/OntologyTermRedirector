@@ -17,7 +17,7 @@ ExecStart=poetry run gunicorn \
          --workers 8 \
          --timeout 300 \
          --bind unix:/run/uwsgi/term-redirector.sock \
-         main:app
+         ontology_term_redirector.main:app
 ExecReload=/bin/kill -s HUP $MAINPID
 
 [Install]
