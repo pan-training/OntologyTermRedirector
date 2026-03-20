@@ -13,20 +13,20 @@ terms.add((URIRef("http://edamontology.org/topic_4012"), RDFS.label, Literal("FA
 @app.route("/")
 def root_url():
     """Show something when accessing the server."""
-    return {"status": "OK", "description": "Redirect to training materials for given ontology term. Use /term/<term_id> endpoint."}
+    return {"status": "OK", "description": "Redirect to training materials for given ontology term. Use /ontology-term-search?iri=<term_iri> endpoint."}
 
-@app.route("/term")
+@app.route("/ontology-term-search")
 def redirect_to_training():
     """Redirect to training materials for given ontology term."""
-    term_uri = request.args.get("uri")
+    term_uri = request.args.get("iri")
     pan_training_url = request.args.get("base_url", request.url_root).rstrip("/")
 
     if not term_uri:
-        return {"error": "No term URI provided. Use /term?uri=<term_uri>."}, 400
+        return {"error": "No term URI provided. Use /ontology-term-search?iri=<term_iri>."}, 400
 
     term_labels = list(terms.objects(URIRef(term_uri), RDFS.label))
 
     if not term_labels:
-        return {"error": "Term not found", "term_uri": term_uri}, 404
+        return {"error": "Term not found", "term_iri": term_uri}, 404
 
     return redirect(f"{pan_training_url}/materials?{urlencode({'scientific_topics': term_labels[0]})}")
