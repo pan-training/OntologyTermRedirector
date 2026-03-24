@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect
 from rdflib import Graph, URIRef, Literal, RDFS
+from rdflib.paths import ZeroOrMore
 from urllib.parse import urlencode
 
 app = Flask(__name__)
@@ -24,9 +25,9 @@ def redirect_to_training():
     if not term_uri:
         return {"error": "No term URI provided. Use /ontology-term-search?iri=<term_iri>."}, 400
 
-    term_labels = list(terms.objects(URIRef(term_uri), RDFS.label))
+    term_labels = list(terms.objects(URIRef(term_uri), ~RDFS.subClassOf * ZeroOrMore / RDFS.label))
 
     if not term_labels:
         return {"error": "Term not found", "term_iri": term_uri}, 404
 
-    return redirect(f"{pan_training_url}/materials?{urlencode({'scientific_topics': term_labels[0]})}")
+    return redirect(f"{pan_training_url}/materials?{urlencode([('scientific_topics[]', label) for label in term_labels])}")
