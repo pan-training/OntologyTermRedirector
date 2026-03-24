@@ -11,6 +11,16 @@ with open("data/PaNET.owl") as f:
 terms.add((URIRef("http://edamontology.org/topic_4012"), RDFS.label, Literal("FAIR data")))
 
 
+def get_url(term_iri: str, base_url: str, endpoint="materials") -> str:
+    """Get the URL to redirect to for a given term IRI."""
+    term_labels = list(terms.objects(URIRef(term_iri), ~RDFS.subClassOf * ZeroOrMore / RDFS.label))
+
+    if not term_labels:
+        raise ValueError(f"Term not found: {term_iri}")
+
+    return f"{base_url}/{endpoint}?{urlencode([('scientific_topics[]', label) for label in term_labels])}"
+
+
 @app.route("/")
 def root_url():
     """Show something when accessing the server."""
@@ -25,9 +35,8 @@ def redirect_to_training():
     if not term_uri:
         return {"error": "No term URI provided. Use /ontology-term-search?iri=<term_iri>."}, 400
 
-    term_labels = list(terms.objects(URIRef(term_uri), ~RDFS.subClassOf * ZeroOrMore / RDFS.label))
-
-    if not term_labels:
-        return {"error": "Term not found", "term_iri": term_uri}, 404
-
-    return redirect(f"{pan_training_url}/materials?{urlencode([('scientific_topics[]', label) for label in term_labels])}")
+    try:
+        redirect_url = get_url(term_uri, pan_training_url)
+        return redirect(redirect_url)
+    except ValueError as e:
+        return {"error": str(e), "term_iri": term_uri}, 404
