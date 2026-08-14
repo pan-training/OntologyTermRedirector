@@ -11,14 +11,30 @@ with open("data/PaNET.owl") as f:
 terms.add((URIRef("http://edamontology.org/topic_4012"), RDFS.label, Literal("FAIR data")))
 
 
-def get_url(term_iri: str, base_url: str, endpoint="materials") -> str:
+def get_url(term_iri: str, base_url: str, include_base: bool, include_sub: bool, endpoint="materials") -> str:
     """Get the URL to redirect to for a given term IRI."""
-    term_labels = list(terms.objects(URIRef(term_iri), ~RDFS.subClassOf * ZeroOrMore / RDFS.label))
+    pattern = {
+        (False, False): RDFS.label,
+        (False, True): ~RDFS.subClassOf * ZeroOrMore / RDFS.label,
+        (True, False): RDFS.subClassOf * ZeroOrMore / RDFS.label,
+        (True, True): ((~RDFS.subClassOf * ZeroOrMore) | (RDFS.subClassOf * ZeroOrMore)) / RDFS.label
+    }[include_base, include_sub]
+    
+    term_labels = list(terms.objects(URIRef(term_iri), pattern))
 
     if not term_labels:
         raise ValueError(f"Term not found: {term_iri}")
 
     return f"{base_url}/{endpoint}?{urlencode([('scientific_topics[]', label) for label in term_labels])}"
+    
+
+def parse_bool(value: str | None) -> bool:
+    """Return True when value is present (except it is set to something that looks like false)."""
+    if value is None:
+        return False
+    if value.lower() in ("no", "n", "false", "f", "0"):
+        return False
+    return True
 
 
 @app.route("/")
@@ -30,13 +46,16 @@ def root_url():
 def redirect_to_training():
     """Redirect to training materials for given ontology term."""
     term_uri = request.args.get("iri")
+    include_base = parse_bool(request.args.get("include_base_classes"))
+    include_sub = parse_bool(request.args.get("include_sub_classes"))
     pan_training_url = request.args.get("base_url", request.url_root).rstrip("/")
 
     if not term_uri:
         return {"error": "No term URI provided. Use /ontology-term-search?iri=<term_iri>."}, 400
 
     try:
-        redirect_url = get_url(term_uri, pan_training_url)
+        redirect_url = get_url(term_uri, pan_training_url, include_base, include_sub)
         return redirect(redirect_url)
     except ValueError as e:
         return {"error": str(e), "term_iri": term_uri}, 404
+
